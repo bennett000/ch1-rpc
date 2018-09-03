@@ -13,7 +13,7 @@
     "webworker",
     "postMessage"
   ],
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": {
     "name": "Michael J. Bennett",
     "email": "dev@michaeljbennett.info",
@@ -35,7 +35,7 @@
   },
   "main": "src/index.ts",
   "module": "src/index.ts",
-  "typings": "./index.d.ts",
+  "typings": "src/index.ts",
   "scripts": {
     "clean:cover": "rimraf ./coverage",
     "precommit": "lint-staged",
