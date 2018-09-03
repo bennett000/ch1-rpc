@@ -1,5 +1,7 @@
 # CH1 RPC
 
+[![CircleCI](https://circleci.com/gh/bennett000/ch1-rpc.svg?style=svg)](https://circleci.com/gh/bennett000/ch1-rpc)
+
 _This is not well maintained_
 
 _This is not traditional RPC, but it is like it_
