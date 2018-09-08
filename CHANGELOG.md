@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.0.4
+
+- exports `Remote` and `RemoteDesc`
+
 ## 1.0.3
 
 - Minification safe fixes

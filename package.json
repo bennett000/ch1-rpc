@@ -13,7 +13,7 @@
     "webworker",
     "postMessage"
   ],
-  "version": "1.0.3",
+  "version": "1.0.4",
   "author": {
     "name": "Michael J. Bennett",
     "email": "dev@michaeljbennett.info",
@@ -109,5 +109,8 @@
       "json",
       "node"
     ]
+  },
+  "dependencies": {
+    "@ch1/rpc": "^1.0.3"
   }
 }
