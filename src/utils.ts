@@ -13,7 +13,7 @@ import {
   RPCNotify,
   RPCReturnPayload,
 } from './interfaces';
-import { DEFAULT_ASYNC_TYPE } from '../src/constants';
+import { DEFAULT_ASYNC_TYPE } from './constants';
 
 /**
  * This function is for creating new instances of functions.  This is handy for
@@ -210,25 +210,16 @@ export const pnoop: () => Promise<void> = () =>
 
 export function createUidGenerator(): () => string {
   let uidCount = 0;
+  const rpcId = Math.floor(Math.random() * 100000).toString(32);
 
   return () => {
     // increment the counter
     uidCount += 1;
 
-    // reset it if it's 'high'
-    uidCount = uidCount > 1000 ? 0 : uidCount;
-
     // return a uid
-    return [
-      'u',
-      Date.now().toString(16),
-      uidCount,
-      Math.floor(Math.random() * 100000).toString(32),
-    ].join('-');
+    return [rpcId, uidCount.toString(32)].join('-');
   };
 }
-
-export const uid = createUidGenerator();
 
 export function defer<T>(): RPCDefer<T> {
   let pass = noop;

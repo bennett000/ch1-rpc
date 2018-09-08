@@ -16,6 +16,7 @@ describe('remoteProcedure functions', () => {
       message: '',
       on: () => noop,
       remote: {},
+      uid: () => 'random id',
     };
   });
 
@@ -84,7 +85,10 @@ describe('remoteProcedure functions', () => {
         isDone = true;
       };
 
-      rp.doPost(post, RPCEventType.invoke, 'remote', ['some', 'args']);
+      rp.doPost(() => 'some id', post, RPCEventType.invoke, 'remote', [
+        'some',
+        'args',
+      ]);
     });
   });
 
@@ -93,6 +97,7 @@ describe('remoteProcedure functions', () => {
       const dict: RPCAsyncContainerDictionary = {};
       const post = noop;
       rp.promiseRemote(
+        () => 'some id',
         dict,
         post,
         RPCEventType.promise,

@@ -3,11 +3,12 @@
   "buildOnSave": false,
   "compilerOptions": {
     "declaration": true,
-    "module": "commonjs",
+    "module": "es6",
+    "moduleResolution": "node",
     "outDir": "dist/",
     "sourceMap": true,
     "strict": false,
-    "target": "es2015"
+    "target": "es6"
   },
   "exclude": ["**/*.spec.ts"]
 }

@@ -35,10 +35,10 @@
   },
   "main": "dist/index.js",
   "module": "dist/index.js",
-  "typings": "dist/index.d.ts",
+  "types": "dist/index.d.ts",
   "scripts": {
     "prebuild": "rimraf ./dist",
-    "build": "tsickle",
+    "build": "tsc",
     "precommit": "lint-staged",
     "pretest": "rimraf coverage/ && rimraf ./dist",
     "test": "jest",
@@ -54,8 +54,7 @@
     "prettier": "^1.13.5",
     "rimraf": "^2.6.2",
     "ts-jest": "^22.4.6",
-    "tsickle": "^0.32.1",
-    "typescript": "^2.0.3"
+    "typescript": "^3.0.3"
   },
   "lint-staged": {
     "*.{ts,js,json,css,md}": [

@@ -186,11 +186,18 @@ export interface RPCOptions {
   useAcks?: Dictionary<number>;
 }
 
+export interface FunctionalState {
+  responders: RPCEventRegistry;
+  successHandlers: RPCEventRegistry;
+  errorHandlers: RPCEventRegistry;
+}
 export interface RPCAbstractConfig extends RPCOptions {
   message?: string;
   remote?: Object;
   emit?: ConfiguredRPCEmit;
   on?: ConfiguredRPCOn;
+  functionalState?: FunctionalState;
+  uid?: () => string;
 }
 
 export interface RPCConfig extends RPCAbstractConfig {

@@ -54,15 +54,20 @@ export function registerAsync<T>(
 }
 
 export function doPost(
+  uid: () => string,
   postMethod,
   type: number,
   remoteFunction: string,
   args: any[],
 ) {
-  const event = createEvent(type, {
-    args,
-    fn: remoteFunction,
-  });
+  const event = createEvent(
+    type,
+    {
+      args,
+      fn: remoteFunction,
+    },
+    uid(),
+  );
 
   postMethod(event);
 
@@ -87,6 +92,7 @@ export function doPost(
 // }
 
 export function promiseRemote(
+  uid: () => string,
   callbacks: RPCAsyncContainerDictionary,
   postMethod: ConfiguredRPCEmit,
   eventType: number,
@@ -95,7 +101,7 @@ export function promiseRemote(
   args,
 ) {
   const d = defer();
-  const event = doPost(postMethod, eventType, remoteFunction, args);
+  const event = doPost(uid, postMethod, eventType, remoteFunction, args);
 
   registerAsync(callbacks, d, asyncType, event.uid);
 
@@ -112,6 +118,7 @@ export function create(
     case RPCAsyncType.promise:
       return (...args) =>
         promiseRemote(
+          c.uid,
           callbacks,
           c.emit,
           RPCEventType.promise,

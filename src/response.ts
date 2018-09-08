@@ -14,10 +14,10 @@ import {
   rangeError,
   throwIfNotRPCEvent,
   typeError,
-  uid,
 } from './utils';
 
 import {
+  FunctionalState,
   RemoteDesc,
   RPCAsyncContainer,
   RPCAsyncContainerDictionary,
@@ -40,15 +40,17 @@ const fnReturn = (
   callbacks: RPCAsyncContainerDictionary,
 ) => returnPayload(c, payload, callbacks, id);
 
-const responders: RPCEventRegistry = {
-  // [RPCEventType.ack]: nodeOn,
-  // [RPCEventType.ack]: nodeRemoveListener,
-  // [RPCEventType.ack]: nodeCallback,
-};
-
-const successHandlers: RPCEventRegistry = {};
-
-const errorHandlers: RPCEventRegistry = {};
+export function createFunctionalState(): FunctionalState {
+  return {
+    responders: {
+      // [RPCEventType.ack]: nodeOn,
+      // [RPCEventType.ack]: nodeRemoveListener,
+      // [RPCEventType.ack]: nodeCallback,
+    },
+    successHandlers: {},
+    errorHandlers: {},
+  };
+}
 
 function register(
   dictionary: RPCEventRegistry | RPCAsyncRegistry,
@@ -61,22 +63,13 @@ function register(
   dictionary[key] = value;
 }
 
-export const registerResponder: RPCRegister = register.bind(null, responders);
-export const registerSuccessHandler: RPCRegister = register.bind(
-  null,
-  successHandlers,
-);
-export const registerErrorHandler: RPCRegister = register.bind(
-  null,
-  errorHandlers,
-);
-
 export function create(
   config: RPCConfig,
   callbacks,
   remoteDesc: RemoteDesc,
 ): Promise<{ off: () => Promise<void>; remoteDesc: RemoteDesc }> {
-  const id = uid();
+  bootstrap(config.functionalState);
+  const id = config.uid();
 
   const initState = createInitializationState(config, remoteDesc, id);
 
@@ -113,7 +106,13 @@ export function createInitializationState(
   let createTimeout = setTimeout(fireCreate, delay);
 
   function fireCreate() {
-    config.emit(createEvent(RPCEventType.create, { result: [remoteDesc] }));
+    config.emit(
+      createEvent(
+        RPCEventType.create,
+        { result: [remoteDesc] },
+        config.uid(),
+      ),
+    );
     delay *= config.defaultCreateRetryCurve;
     createTimeout = setTimeout(fireCreate, delay);
   }
@@ -165,7 +164,11 @@ export function initialize(
         initState.localRemoteDesc = payload.result[0];
         initState.hasCreated = true;
         config.emit(
-          createEvent(RPCEventType.createReturn, { result: [initState.id] }),
+          createEvent(
+            RPCEventType.createReturn,
+            { result: [initState.id] },
+            config.uid(),
+          ),
         );
       } else if (event.type === RPCEventType.createReturn) {
         if (initState.isCreated) {
@@ -212,7 +215,7 @@ export function ack(c: RPCConfig, event: RPCEvent) {
 }
 
 export function sendAck(c: RPCConfig, id: string) {
-  c.emit(createEvent(RPCEventType.ack, { result: [id] }));
+  c.emit(createEvent(RPCEventType.ack, { result: [id] }, c.uid()));
 }
 
 export function invoke(c: RPCConfig, payload: RPCPayload, id: string) {
@@ -238,15 +241,15 @@ export function invoke(c: RPCConfig, payload: RPCPayload, id: string) {
 }
 
 export function fireError(
-  c,
+  c: RPCConfig,
   payload: RPCErrorPayload,
   asyncReturn: RPCAsyncContainer<any>,
 ) {
   const error = createErrorFromRPCError(c, payload.error);
   const asyncFn: any = asyncReturn.async;
 
-  if (errorHandlers[asyncReturn.type]) {
-    errorHandlers[asyncReturn.type](asyncFn, error);
+  if (c.functionalState.errorHandlers[asyncReturn.type]) {
+    c.functionalState.errorHandlers[asyncReturn.type](asyncFn, error);
   } else {
     throw error;
   }
@@ -259,8 +262,11 @@ export function fireSuccess(
 ) {
   const asyncFn = asyncReturn.async;
 
-  if (successHandlers[asyncReturn.type]) {
-    successHandlers[asyncReturn.type](asyncFn, payload.result);
+  if (c.functionalState.successHandlers[asyncReturn.type]) {
+    c.functionalState.successHandlers[asyncReturn.type](
+      asyncFn,
+      payload.result,
+    );
   } else {
     rangeError('fireSuccess: no async handler');
   }
@@ -340,7 +346,7 @@ export function on(
     );
 
     tryHandler(
-      responders[event.type],
+      c.functionalState.responders[event.type],
       [c, event.payload, event.uid, callbacks, id],
       event,
     );
@@ -351,7 +357,20 @@ export function on(
   });
 }
 
-function bootstrap() {
+export function bootstrap(functionalState: FunctionalState) {
+  const registerResponder: RPCRegister = register.bind(
+    null,
+    functionalState.responders,
+  );
+  const registerSuccessHandler: RPCRegister = register.bind(
+    null,
+    functionalState.successHandlers,
+  );
+  const registerErrorHandler: RPCRegister = register.bind(
+    null,
+    functionalState.errorHandlers,
+  );
+
   /** Bootstrap the inbuilt respoonders */
   registerResponder(RPCEventType.ack, ack);
   registerResponder(RPCEventType.invoke, invoke);
@@ -398,6 +417,5 @@ function bootstrap() {
   //     return;
   //   }
   //   break;
+  return functionalState;
 }
-
-bootstrap();

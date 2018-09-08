@@ -1,7 +1,6 @@
 /**
  * Event functions
  */
-import { uid } from './utils';
 import { createRPCError } from './rpc-error';
 
 import { RPCConfig, RPCEvent, RPCPayload } from './interfaces';
@@ -12,12 +11,12 @@ import { RPCConfig, RPCEvent, RPCPayload } from './interfaces';
 export function createEvent(
   type: number,
   payload: RPCPayload,
-  givenUid?: string,
+  givenUid: string,
 ): RPCEvent {
   return {
     payload,
     type,
-    uid: givenUid || uid(),
+    uid: givenUid,
   };
 }
 

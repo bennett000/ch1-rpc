@@ -12,9 +12,15 @@ describe('network over post functions', () => {
     config = {
       emit: noop,
       enableStackTrace: false,
+      functionalState: nOp.bootstrap({
+        responders: {},
+        successHandlers: {},
+        errorHandlers: {},
+      }),
       message: '',
       on: () => noop,
       remote: {},
+      uid: () => 'some id',
     };
 
     event = {
