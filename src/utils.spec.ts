@@ -353,49 +353,4 @@ describe('utils functions', () => {
       expect(utils.safeInvoke(test, []) instanceof Error).toBe(true);
     });
   });
-
-  describe('uid singleton', () => {
-    it('there should be a uid singleton function that gives ids', () => {
-      const id1 = utils.uid();
-      const id2 = utils.uid();
-
-      expect(id1 && id2).toBeTruthy();
-      expect(id1).not.toBe(id2);
-    });
-
-    it('should generate ids that have a hex timestamp as their first parameter', () => {
-      const threshold = 5;
-      const now = Date.now();
-      const idParts = utils.uid().split('-');
-      const date = parseInt(idParts[1], 16);
-      const minDate = date - threshold;
-      const maxDate = date + threshold;
-
-      expect(minDate < now).toBe(true);
-      expect(maxDate > now).toBe(true);
-    });
-
-    it('should generate ids that have an incrementer as their second parameter', () => {
-      const idParts1 = utils.uid().split('-');
-      const firstInc = +idParts1[2];
-      const idParts2 = utils.uid().split('-');
-      const secondInc = +idParts2[2];
-
-      expect(secondInc).toBe(firstInc + 1);
-    });
-
-    it('the incrementer should reset after a thousand runs', () => {
-      const idParts1 = utils.uid().split('-');
-      const firstInc = +idParts1[2];
-
-      for (let i = 0; i < 1000; i += 1) {
-        utils.uid();
-      }
-
-      const idParts2 = utils.uid().split('-');
-      const secondInc = +idParts2[2];
-
-      expect(secondInc).toBe(firstInc);
-    });
-  });
 });

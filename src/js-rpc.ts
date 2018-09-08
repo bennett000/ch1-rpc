@@ -20,6 +20,7 @@ import {
   DEFAULT_CREATE_RETRY_CURVE,
   DEFAULT_CREATE_WAIT,
 } from './constants';
+import { createUidGenerator } from './utils';
 
 /**
  * Where `RemoteType` is the description of the interface you _expect_ to be
@@ -84,8 +85,11 @@ export function validateConfig(c: RPCConfig, remote: Remote<any>): RPCConfig {
     c.defaultCreateRetryCurve || DEFAULT_CREATE_RETRY_CURVE;
   c.defaultCreateWait = c.defaultCreateWait || DEFAULT_CREATE_WAIT;
   c.enableStackTrace = c.enableStackTrace || false;
+  c.functionalState = nOp.createFunctionalState();
   c.maxAckDelay = c.maxAckDelay || 5000;
   c.message = c.message || DEFAULT_MESSAGE;
+
+  c.uid = createUidGenerator();
 
   c.useAcks = c.useAcks ? Object.create(null) : null;
   c.remote = remote;

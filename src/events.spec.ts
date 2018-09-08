@@ -16,11 +16,7 @@ describe('event functions', () => {
 
   describe('createErrorEvent function', () => {
     it('should run create a serializable error', () => {
-      const event = events.createErrorEvent(
-        config,
-        'invoke',
-        new Error('test'),
-      );
+      const event = events.createErrorEvent(config, 3, new Error('test'));
 
       expect(typeof JSON.stringify(event)).toBe('string');
     });

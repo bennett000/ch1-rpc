@@ -4,7 +4,6 @@
 import {
   Dictionary,
   RPC,
-  RPCAsyncType,
   RPCDefer,
   RPCNodeCallback,
   RPCEvent,
@@ -14,6 +13,7 @@ import {
   RPCNotify,
   RPCReturnPayload,
 } from './interfaces';
+import { DEFAULT_ASYNC_TYPE } from './constants';
 
 /**
  * This function is for creating new instances of functions.  This is handy for
@@ -59,14 +59,12 @@ export function isRPC<T>(arg: any): arg is RPC<T> {
   return true;
 }
 
-export const isRPCDefaultAsync = (arg): arg is RPCAsyncType => {
-  if (RPCAsyncType[arg]) {
+export const isRPCDefaultAsync = arg => {
+  if (arg === DEFAULT_ASYNC_TYPE) {
     return true;
   }
   return false;
 };
-
-export const uid = createUidGenerator();
 
 export function isDefer<T>(thing: any): thing is RPCDefer<T> {
   if (!thing) {
@@ -212,21 +210,14 @@ export const pnoop: () => Promise<void> = () =>
 
 export function createUidGenerator(): () => string {
   let uidCount = 0;
+  const rpcId = Math.floor(Math.random() * 100000).toString(32);
 
   return () => {
     // increment the counter
     uidCount += 1;
 
-    // reset it if it's 'high'
-    uidCount = uidCount > 1000 ? 0 : uidCount;
-
     // return a uid
-    return [
-      'u',
-      Date.now().toString(16),
-      uidCount,
-      Math.floor(Math.random() * 100000).toString(32),
-    ].join('-');
+    return [rpcId, uidCount.toString(32)].join('-');
   };
 }
 

@@ -17,7 +17,7 @@ import { defer, rangeError, throwIfNotDefer } from './utils';
 export function validateRegistration<T>(
   callbacks: RPCAsyncContainerDictionary,
   asyncFn: RPCAsync<T>,
-  type: RPCAsyncType,
+  type: number,
   uid: string,
 ) {
   if (callbacks[uid]) {
@@ -42,7 +42,7 @@ export function validateRegistration<T>(
 export function registerAsync<T>(
   callbacks: RPCAsyncContainerDictionary,
   callback: RPCAsync<T>,
-  type: RPCAsyncType,
+  type: number,
   uid: string,
 ) {
   validateRegistration(callbacks, callback, type, uid);
@@ -54,15 +54,20 @@ export function registerAsync<T>(
 }
 
 export function doPost(
+  uid: () => string,
   postMethod,
-  type: RPCEventType,
+  type: number,
   remoteFunction: string,
   args: any[],
 ) {
-  const event = createEvent(type, {
-    args,
-    fn: remoteFunction,
-  });
+  const event = createEvent(
+    type,
+    {
+      args,
+      fn: remoteFunction,
+    },
+    uid(),
+  );
 
   postMethod(event);
 
@@ -87,15 +92,16 @@ export function doPost(
 // }
 
 export function promiseRemote(
+  uid: () => string,
   callbacks: RPCAsyncContainerDictionary,
   postMethod: ConfiguredRPCEmit,
-  eventType: RPCEventType,
-  asyncType: RPCAsyncType,
+  eventType: number,
+  asyncType: number,
   remoteFunction: string,
   args,
 ) {
   const d = defer();
-  const event = doPost(postMethod, eventType, remoteFunction, args);
+  const event = doPost(uid, postMethod, eventType, remoteFunction, args);
 
   registerAsync(callbacks, d, asyncType, event.uid);
 
@@ -106,12 +112,13 @@ export function create(
   c: RPCConfig,
   callbacks: RPCAsyncContainerDictionary,
   fullFnName: string,
-  fnType?: RPCAsyncType,
+  fnType?: number,
 ) {
   switch (fnType) {
     case RPCAsyncType.promise:
       return (...args) =>
         promiseRemote(
+          c.uid,
           callbacks,
           c.emit,
           RPCEventType.promise,
@@ -134,6 +141,7 @@ export function create(
           'remote-procedure: Unsupported function type ' + fnType,
         );
       }
+      console.log('return default');
       return create(c, callbacks, fullFnName, c.defaultAsyncType);
   }
 }
