@@ -17,7 +17,7 @@ import { defer, rangeError, throwIfNotDefer } from './utils';
 export function validateRegistration<T>(
   callbacks: RPCAsyncContainerDictionary,
   asyncFn: RPCAsync<T>,
-  type: RPCAsyncType,
+  type: number,
   uid: string,
 ) {
   if (callbacks[uid]) {
@@ -42,7 +42,7 @@ export function validateRegistration<T>(
 export function registerAsync<T>(
   callbacks: RPCAsyncContainerDictionary,
   callback: RPCAsync<T>,
-  type: RPCAsyncType,
+  type: number,
   uid: string,
 ) {
   validateRegistration(callbacks, callback, type, uid);
@@ -55,7 +55,7 @@ export function registerAsync<T>(
 
 export function doPost(
   postMethod,
-  type: RPCEventType,
+  type: number,
   remoteFunction: string,
   args: any[],
 ) {
@@ -89,8 +89,8 @@ export function doPost(
 export function promiseRemote(
   callbacks: RPCAsyncContainerDictionary,
   postMethod: ConfiguredRPCEmit,
-  eventType: RPCEventType,
-  asyncType: RPCAsyncType,
+  eventType: number,
+  asyncType: number,
   remoteFunction: string,
   args,
 ) {
@@ -106,7 +106,7 @@ export function create(
   c: RPCConfig,
   callbacks: RPCAsyncContainerDictionary,
   fullFnName: string,
-  fnType?: RPCAsyncType,
+  fnType?: number,
 ) {
   switch (fnType) {
     case RPCAsyncType.promise:
@@ -134,6 +134,7 @@ export function create(
           'remote-procedure: Unsupported function type ' + fnType,
         );
       }
+      console.log('return default');
       return create(c, callbacks, fullFnName, c.defaultAsyncType);
   }
 }

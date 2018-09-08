@@ -17,8 +17,7 @@ export interface Remote<T> extends Dictionary<Function | Object> {}
 /**
  * Specify async types on the remote
  */
-export interface RemoteDesc
-  extends Dictionary<RPCAsyncType | Dictionary<RPCAsyncType>> {}
+export interface RemoteDesc extends Dictionary<number | Dictionary<number>> {}
 
 /**
  * Async style function union
@@ -33,7 +32,7 @@ export type RPCAsync<T> =
  * Ensures correct async response
  */
 export interface RPCAsyncContainer<T> {
-  type: RPCAsyncType;
+  type: number;
   async: RPCAsync<T> | Dictionary<RPCNodeEventInternal>;
 }
 
@@ -102,10 +101,10 @@ export interface RPCNodeCallback<T> {
 //   | 'observable'
 //   | 'promise';
 
-export enum RPCAsyncType {
-  observable = 100,
-  promise = 200,
-}
+export const RPCAsyncType = {
+  observable: 100,
+  promise: 200,
+};
 
 export interface RPCDefer<T> {
   resolve: (any) => any;
@@ -135,18 +134,18 @@ export interface RPCDefer<T> {
 //   | 'subscribeReturn'
 //   | 'unSubscribeReturn';
 
-export enum RPCEventType {
-  ack = 1,
-  create = 2,
-  createReturn = 3,
-  destroy = 4,
-  destroyReturn = 5,
-  fnReturn = 6,
-  invoke = 7,
-  promise = 9,
-  subscribe = 10,
-  unsubscribe = 11,
-}
+export const RPCEventType = Object.freeze({
+  ack: 1,
+  create: 2,
+  createReturn: 3,
+  destroy: 4,
+  destroyReturn: 5,
+  fnReturn: 6,
+  invoke: 7,
+  promise: 9,
+  subscribe: 10,
+  unsubscribe: 11,
+});
 
 export interface RPCEmit {
   (message: string, payload: RPCEvent): any;
@@ -178,7 +177,7 @@ export interface ConfiguredRPCOn {
 }
 
 export interface RPCOptions {
-  defaultAsyncType?: RPCAsyncType;
+  defaultAsyncType?: number;
   defaultCreateRetry?: number;
   defaultCreateRetryCurve?: number;
   defaultCreateWait?: number;
@@ -200,10 +199,10 @@ export interface RPCConfig extends RPCAbstractConfig {
 }
 
 export type RPCEventRegistry = {
-  [key in RPCEventType]?: (args: any[]) => any
+  [key: number]: (...args: any[]) => any;
 };
 export type RPCAsyncRegistry = {
-  [key in RPCAsyncType]?: (args: any[]) => any
+  [key: number]: (...args: any[]) => any;
 };
 
 export type RPCRegister = (
@@ -247,7 +246,7 @@ export type RPCPayload =
   | RPCErrorPayload;
 
 export interface RPCEvent {
-  type: RPCEventType;
+  type: number;
   payload: RPCPayload;
   uid: string;
   useAcks?: boolean;

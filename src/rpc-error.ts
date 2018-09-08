@@ -2,7 +2,7 @@
  * Functions for working with different types of errors
  */
 import { CodedError, RPCConfig, RPCError } from './interfaces';
-import { safeInstantiate, throwIfNotError } from './utils';
+import { throwIfNotError } from './utils';
 
 /* Why do we need to fight typescript's es5 mode on this? */
 interface NamedFunction extends Function {

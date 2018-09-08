@@ -126,6 +126,8 @@ describe('Remote Object functions', () => {
         test2();
       }
 
+      debugger;
+
       const test = remote.create<Test>(
         config,
         {},
@@ -134,7 +136,6 @@ describe('Remote Object functions', () => {
           // test2: 'nodeCallback',
         },
       );
-
       expect(isFunction(test.test1)).toBe(true);
       // expect(isFunction(test.test2)).toBe(true);
     });

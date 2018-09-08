@@ -4,13 +4,13 @@
 import { uid } from './utils';
 import { createRPCError } from './rpc-error';
 
-import { RPCConfig, RPCEvent, RPCEventType, RPCPayload } from './interfaces';
+import { RPCConfig, RPCEvent, RPCPayload } from './interfaces';
 
 /**
  * create an event object
  */
 export function createEvent(
-  type: RPCEventType,
+  type: number,
   payload: RPCPayload,
   givenUid?: string,
 ): RPCEvent {
@@ -26,7 +26,7 @@ export function createEvent(
  */
 export function createErrorEvent(
   c: RPCConfig,
-  type: RPCEventType,
+  type: number,
   error: Error,
   id?: string,
 ): RPCEvent {

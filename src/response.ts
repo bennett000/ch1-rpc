@@ -71,48 +71,6 @@ export const registerErrorHandler: RPCRegister = register.bind(
   errorHandlers,
 );
 
-/** Bootstrap the inbuilt respoonders */
-registerResponder(RPCEventType.ack, ack);
-registerResponder(RPCEventType.invoke, invoke);
-registerResponder(RPCEventType.fnReturn, fnReturn);
-registerResponder(RPCEventType.promise, promise);
-
-registerErrorHandler(RPCAsyncType.promise, (asyncFn: any, error: any) => {
-  if (isDefer<any>(asyncFn)) {
-    asyncFn.reject(error);
-  } else {
-    throw new RangeError('registerErrorHandler: incorrect function type');
-  }
-});
-
-// case 'nodeCallback':
-//   if (isRPCNodeCallback<any>(asyncFn)) {
-//     asyncFn(error);
-//     return;
-//   }
-//   break;
-
-registerSuccessHandler(RPCAsyncType.promise, (asyncFn: any, payload: any) => {
-  if (isDefer(asyncFn)) {
-    asyncFn.resolve.apply(asyncFn.resolve, payload);
-  } else {
-    throw new RangeError('registerSuccessHandler: incorrect function type');
-  }
-});
-// case 'nodeCallback':
-//   if (isRPCNodeCallback(asyncFn)) {
-//     asyncFn.apply(null, [null].concat(payload.result));
-//     return;
-//   }
-//   break;
-
-// case 'nodeEvent':
-//   if (isRPCNotify(asyncFn)) {
-//     asyncFn.apply(null, [null].concat(payload.result));
-//     return;
-//   }
-//   break;
-
 export function create(
   config: RPCConfig,
   callbacks,
@@ -392,3 +350,54 @@ export function on(
     }
   });
 }
+
+function bootstrap() {
+  /** Bootstrap the inbuilt respoonders */
+  registerResponder(RPCEventType.ack, ack);
+  registerResponder(RPCEventType.invoke, invoke);
+  registerResponder(RPCEventType.fnReturn, fnReturn);
+  registerResponder(RPCEventType.promise, promise);
+
+  registerErrorHandler(RPCAsyncType.promise, (asyncFn: any, error: any) => {
+    if (isDefer<any>(asyncFn)) {
+      asyncFn.reject(error);
+    } else {
+      throw new RangeError('registerErrorHandler: incorrect function type');
+    }
+  });
+
+  // case 'nodeCallback':
+  //   if (isRPCNodeCallback<any>(asyncFn)) {
+  //     asyncFn(error);
+  //     return;
+  //   }
+  //   break;
+
+  registerSuccessHandler(
+    RPCAsyncType.promise,
+    (asyncFn: any, payload: any) => {
+      if (isDefer(asyncFn)) {
+        asyncFn.resolve.apply(asyncFn.resolve, payload);
+      } else {
+        throw new RangeError(
+          'registerSuccessHandler: incorrect function type',
+        );
+      }
+    },
+  );
+  // case 'nodeCallback':
+  //   if (isRPCNodeCallback(asyncFn)) {
+  //     asyncFn.apply(null, [null].concat(payload.result));
+  //     return;
+  //   }
+  //   break;
+
+  // case 'nodeEvent':
+  //   if (isRPCNotify(asyncFn)) {
+  //     asyncFn.apply(null, [null].concat(payload.result));
+  //     return;
+  //   }
+  //   break;
+}
+
+bootstrap();

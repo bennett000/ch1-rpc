@@ -13,7 +13,7 @@
     "webworker",
     "postMessage"
   ],
-  "version": "1.0.2",
+  "version": "1.0.3",
   "author": {
     "name": "Michael J. Bennett",
     "email": "dev@michaeljbennett.info",
@@ -39,10 +39,10 @@
   "scripts": {
     "prebuild": "rimraf ./dist",
     "build": "tsickle",
-    "clean:cover": "rimraf ./coverage",
     "precommit": "lint-staged",
-    "pretest": "rimraf coverage/",
+    "pretest": "rimraf coverage/ && rimraf ./dist",
     "test": "jest",
+    "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
     "test:watch": "jest --watch"
   },
   "devDependencies": {
