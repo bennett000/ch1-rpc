@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.1.0
+
+- exports commonjs modules
+
 ## 1.0.4
 
 - exports `Remote` and `RemoteDesc`
