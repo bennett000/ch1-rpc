@@ -263,6 +263,7 @@ export interface RPCEvent {
 export interface RPC<T> {
   config: RPCConfig;
   destroy: (reason?: string) => Promise<void>;
+  onDestroy: (callback: (reason?: string) => any) => () => void;
   ready: Promise<void>;
   remote: T;
 }

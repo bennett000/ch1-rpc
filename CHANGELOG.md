@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.3.0
+
+- `onDestroy` event emitter added
+
 ## 1.2.0
 
 - `destroy` will now reject functional backlogs
