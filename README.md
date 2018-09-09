@@ -21,7 +21,7 @@ const b = rpc.create({ /* config */}, {
   sayOnA: (arg) => console.log(`Process B says ${arg}`);
 });
 
-remote.ready().then(() => b.remote.sayOnB('hello world');
+b.ready.then(() => b.remote.sayOnB('hello world');
 // will call sayOnB on process B
 ```
 
@@ -32,7 +32,7 @@ const a = rpc.create({ /* config */}, {
   sayOnB: (arg) => console.log(`Process A says ${arg}`);
 });
 
-remote.ready().then(() => a.remote.sayOnA('hello world');
+a.ready.then(() => a.remote.sayOnA('hello world');
 // will call sayOnA on process A
 ```
 
