@@ -14,6 +14,7 @@ import {
   rangeError,
   throwIfNotRPCEvent,
   typeError,
+  isFunction,
 } from './utils';
 
 import {
@@ -304,13 +305,18 @@ export function promise(c: RPCConfig, payload: RPCPayload, id: string) {
       return;
     }
 
-    result
-      .then((...args) =>
-        c.emit(createEvent(RPCEventType.fnReturn, { result: args }, id)),
-      )
-      .catch(err =>
-        c.emit(createErrorEvent(c, RPCEventType.fnReturn, err, id)),
-      );
+    if (isFunction(result.then)) {
+      result
+        .then((...args) =>
+          c.emit(createEvent(RPCEventType.fnReturn, { result: args }, id)),
+        )
+        .catch(err =>
+          c.emit(createErrorEvent(c, RPCEventType.fnReturn, err, id)),
+        );
+    } else {
+      // support direct invocation fallback
+      c.emit(createEvent(RPCEventType.fnReturn, { result: [result] }, id));
+    }
   } else {
     c.emit(
       createErrorEvent(

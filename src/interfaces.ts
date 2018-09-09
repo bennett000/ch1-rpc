@@ -197,6 +197,7 @@ export interface RPCAbstractConfig extends RPCOptions {
   emit?: ConfiguredRPCEmit;
   on?: ConfiguredRPCOn;
   functionalState?: FunctionalState;
+  callbacks?: RPCAsyncContainerDictionary;
   uid?: () => string;
 }
 
@@ -261,7 +262,7 @@ export interface RPCEvent {
 
 export interface RPC<T> {
   config: RPCConfig;
-  destroy: () => Promise<void>;
+  destroy: (reason?: string) => Promise<void>;
   ready: Promise<void>;
   remote: T;
 }

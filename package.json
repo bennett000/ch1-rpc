@@ -13,7 +13,7 @@
     "webworker",
     "postMessage"
   ],
-  "version": "1.1.0",
+  "version": "1.2.0",
   "author": {
     "name": "Michael J. Bennett",
     "email": "dev@michaeljbennett.info",
@@ -39,7 +39,7 @@
   "scripts": {
     "prebuild": "rimraf ./dist",
     "build": "tsc",
-    "postbuild": "rollup --input dist/index.js --format cjs --file dist/index.cjs.js",
+    "postbuild": "rollup --input dist/index.js --format cjs --file dist/index.cjs.js --sourcemap",
     "precommit": "lint-staged",
     "pretest": "rimraf coverage/ && rimraf ./dist",
     "test": "jest",
