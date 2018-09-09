@@ -108,7 +108,7 @@ describe('basic async e2e', () => {
     };
   });
 
-  it('should work for two simple functions', done => {
+  it('should work for two simple functions (promises)', done => {
     interface Test1 {
       test1(): string;
     }
@@ -139,6 +139,73 @@ describe('basic async e2e', () => {
       })
       .then(() => {
         a.destroy();
+        b.destroy();
+        done();
+      });
+  });
+
+  it('should work for two simple functions (synchronous invocations)', done => {
+    interface Test1 {
+      test1(): string;
+    }
+
+    interface Test2 {
+      test2(): string;
+    }
+
+    const a = rpc.create<Test2>(configA, {
+      test1: () => 'test A',
+    });
+
+    const b = rpc.create<Test1>(configB, {
+      test2: () => 'test B',
+    });
+
+    Promise.all([a.ready, b.ready])
+      .then(() => {
+        return Promise.all([a.remote.test2(), b.remote.test1()]).then(
+          results => {
+            expect(results[0]).toBe('test B');
+            expect(results[1]).toBe('test A');
+          },
+        );
+      })
+      .catch(err => {
+        expect(err.message).toBeUndefined();
+      })
+      .then(() => {
+        a.destroy();
+        b.destroy();
+        done();
+      });
+  });
+
+  it('destroy should cancel pending functions', done => {
+    interface Test1 {
+      test1(): string;
+    }
+
+    interface Test2 {
+      test2(): string;
+    }
+
+    const a = rpc.create<Test2>(configA, {
+      test1: () => new Promise(resolve => resolve('testA')),
+    });
+
+    const b = rpc.create<Test1>(configB, {
+      test2: () => new Promise(() => undefined),
+    });
+
+    a.ready
+      .then(() => {
+        setTimeout(() => {
+          a.destroy('test failure');
+        });
+        return a.remote.test2();
+      })
+      .catch(e => {
+        expect(e.message.indexOf('test failure') > -1).toBe(true);
         b.destroy();
         done();
       });

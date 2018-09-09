@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.2.0
+
+- `destroy` will now reject functional backlogs
+- `promise` asyncs now fallback to invocations
+- `README.md` has API docs
+
 ## 1.1.0
 
 - exports commonjs modules

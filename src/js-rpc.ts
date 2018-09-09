@@ -11,6 +11,7 @@ import {
   RPC,
   RPCAsyncContainerDictionary,
   RPCConfig,
+  RPCEventRegistry,
 } from './interfaces';
 
 import {
@@ -37,7 +38,7 @@ export function create<RemoteType>(
   config = validateConfig(config, remote);
 
   const local: RemoteType = Object.create(null);
-  const callbacks: RPCAsyncContainerDictionary = Object.create(null);
+  const { callbacks } = config;
   const combinedDesc = createRemoteDescFrom(config, remote, remoteDesc);
   let destroy: () => Promise<void> = pnoop;
 
@@ -50,9 +51,9 @@ export function create<RemoteType>(
 
   return <RPC<RemoteType>>{
     config,
-    destroy: () => {
+    destroy: (reason = '') => {
       Object.keys(local).forEach(key => delete local[key]);
-      Object.keys(callbacks).forEach(key => delete callbacks[key]);
+      flushCallbacks(callbacks, config.functionalState.errorHandlers, reason);
       return destroy().then(() => {
         destroy = pnoop;
       });
@@ -60,6 +61,24 @@ export function create<RemoteType>(
     ready: isReady,
     remote: local,
   };
+}
+
+export function flushCallbacks(
+  callbacks: RPCAsyncContainerDictionary,
+  errorHandlers: RPCEventRegistry,
+  reason = '',
+) {
+  Object.keys(callbacks).forEach(id => {
+    const cb = callbacks[id];
+
+    errorHandlers[cb.type]
+      ? errorHandlers[cb.type](cb.async, new Error('rpc flush ' + reason))
+      : console.warn(
+          'rpc: flush: no error handler registered for ' + cb.type,
+        );
+
+    delete callbacks[id];
+  });
 }
 
 export function validateRemote(r: Object): Remote<any> {
@@ -86,6 +105,7 @@ export function validateConfig(c: RPCConfig, remote: Remote<any>): RPCConfig {
   c.defaultCreateWait = c.defaultCreateWait || DEFAULT_CREATE_WAIT;
   c.enableStackTrace = c.enableStackTrace || false;
   c.functionalState = nOp.createFunctionalState();
+  c.callbacks = Object.create(null);
   c.maxAckDelay = c.maxAckDelay || 5000;
   c.message = c.message || DEFAULT_MESSAGE;
 
