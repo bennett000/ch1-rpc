@@ -1,7 +1,14 @@
 /**
  * Main module "really ties the project together"
  */
-import { isObject, pnoop, typeError, throwIfNotFunction } from './utils';
+import {
+  createUidGenerator,
+  isObject,
+  pnoop,
+  typeError,
+  safeInvoke,
+  throwIfNotFunction,
+} from './utils';
 import { create as createRemote, createRemoteDescFrom } from './remote';
 import * as nOp from './response';
 
@@ -21,7 +28,6 @@ import {
   DEFAULT_CREATE_RETRY_CURVE,
   DEFAULT_CREATE_WAIT,
 } from './constants';
-import { createUidGenerator } from './utils';
 
 /**
  * Where `RemoteType` is the description of the interface you _expect_ to be
@@ -37,6 +43,7 @@ export function create<RemoteType>(
   remote = validateRemote(remote);
   config = validateConfig(config, remote);
 
+  const onDestroyDict = Object.create(null);
   const local: RemoteType = Object.create(null);
   const { callbacks } = config;
   const combinedDesc = createRemoteDescFrom(config, remote, remoteDesc);
@@ -56,7 +63,21 @@ export function create<RemoteType>(
       flushCallbacks(callbacks, config.functionalState.errorHandlers, reason);
       return destroy().then(() => {
         destroy = pnoop;
+        Object.keys(onDestroyDict).forEach(key => {
+          safeInvoke(onDestroyDict[key], [reason]);
+          delete onDestroyDict[key];
+        });
       });
+    },
+    onDestroy: (callback: (reason?: string) => any) => {
+      const id =
+        Date.now().toString(32) +
+        Math.floor(Math.random() * 50000).toString(32);
+      onDestroyDict[id] = callback;
+
+      return () => {
+        delete onDestroyDict[id];
+      };
     },
     ready: isReady,
     remote: local,

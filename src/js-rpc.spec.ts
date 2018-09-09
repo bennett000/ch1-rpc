@@ -2,67 +2,6 @@ import * as rpc from './js-rpc';
 import { DEFAULT_MESSAGE } from './constants';
 import { noop } from './utils';
 
-describe('js-rpc functions', () => {
-  let config;
-
-  beforeEach(() => {
-    config = {
-      emit: noop,
-      enableStackTrace: false,
-      message: '',
-      on: noop,
-      remote: {},
-    };
-  });
-
-  describe('create function', () => {
-    it('should run without incident if given valid parameters', () => {
-      expect(() => rpc.create<Object>(config, {})).not.toThrowError();
-    });
-
-    it('should provide a destroy function', () => {
-      const test = rpc.create<Object>(config, {});
-      expect(() => test.destroy()).not.toThrowError();
-    });
-  });
-
-  describe('validateRemote function', () => {
-    it('should resolve if a given value is falsey', () => {
-      expect(() => rpc.validateRemote(null)).not.toThrowError();
-    });
-
-    it('should throw if given value is truthy and also not an object', () => {
-      expect(() => rpc.validateRemote('hello')).toThrowError();
-    });
-
-    it('should not throw if given a valid object', () => {
-      expect(() => rpc.validateRemote({})).not.toThrowError();
-    });
-  });
-
-  describe('validateConfig function', () => {
-    it('should return an immutable (frozen) object', () => {
-      const validConfig = rpc.validateConfig(config, {});
-
-      expect(() => (validConfig.message = 'test')).toThrowError();
-    });
-
-    it('should default to having a false stack prop', () => {
-      config.enableStackTrace = '';
-      const validConfig = rpc.validateConfig(config, {});
-
-      expect(validConfig.enableStackTrace).toBe(false);
-    });
-
-    it('should default to using DEFAULT_MESSAGE', () => {
-      config.message = '';
-      const validConfig = rpc.validateConfig(config, {});
-
-      expect(validConfig.message).toBe(DEFAULT_MESSAGE);
-    });
-  });
-});
-
 describe('basic async e2e', () => {
   let configA;
   let configB;
@@ -180,11 +119,7 @@ describe('basic async e2e', () => {
       });
   });
 
-  it('destroy should cancel pending functions', done => {
-    interface Test1 {
-      test1(): string;
-    }
-
+  it('has an on destroy notification system', done => {
     interface Test2 {
       test2(): string;
     }
@@ -193,21 +128,100 @@ describe('basic async e2e', () => {
       test1: () => new Promise(resolve => resolve('testA')),
     });
 
-    const b = rpc.create<Test1>(configB, {
-      test2: () => new Promise(() => undefined),
+    a.onDestroy(reason => {
+      expect(reason).toBe('test fails');
+      done();
     });
 
-    a.ready
+    a.destroy('test fails').catch(done);
+  });
+
+  it('can deregister on destroy handlers', done => {
+    interface Test2 {
+      test2(): string;
+    }
+
+    const a = rpc.create<Test2>(configA, {
+      test1: () => new Promise(resolve => resolve('testA')),
+    });
+
+    let onDestroyRan = false;
+
+    const dereg = a.onDestroy(reason => {
+      onDestroyRan = true;
+    });
+
+    dereg();
+
+    a.destroy('test fails')
       .then(() => {
+        // this seems hackier than it actually is
         setTimeout(() => {
-          a.destroy('test failure');
-        });
-        return a.remote.test2();
+          expect(onDestroyRan).toBe(false);
+          done();
+        }, 10);
       })
-      .catch(e => {
-        expect(e.message.indexOf('test failure') > -1).toBe(true);
-        b.destroy();
-        done();
-      });
+      .catch(done);
+  });
+});
+
+describe('js-rpc functions', () => {
+  let config;
+
+  beforeEach(() => {
+    config = {
+      emit: noop,
+      enableStackTrace: false,
+      message: '',
+      on: noop,
+      remote: {},
+    };
+  });
+
+  describe('create function', () => {
+    it('should run without incident if given valid parameters', () => {
+      expect(() => rpc.create<Object>(config, {})).not.toThrowError();
+    });
+
+    it('should provide a destroy function', () => {
+      const test = rpc.create<Object>(config, {});
+      expect(() => test.destroy()).not.toThrowError();
+    });
+  });
+
+  describe('validateRemote function', () => {
+    it('should resolve if a given value is falsey', () => {
+      expect(() => rpc.validateRemote(null)).not.toThrowError();
+    });
+
+    it('should throw if given value is truthy and also not an object', () => {
+      expect(() => rpc.validateRemote('hello')).toThrowError();
+    });
+
+    it('should not throw if given a valid object', () => {
+      expect(() => rpc.validateRemote({})).not.toThrowError();
+    });
+  });
+
+  describe('validateConfig function', () => {
+    it('should return an immutable (frozen) object', () => {
+      const validConfig = rpc.validateConfig(config, {});
+
+      expect(() => (validConfig.message = 'test')).toThrowError();
+    });
+
+    it('should default to having a false stack prop', () => {
+      config.enableStackTrace = '';
+      const validConfig = rpc.validateConfig(config, {});
+
+      expect(validConfig.enableStackTrace).toBe(false);
+    });
+
+    it('should default to using DEFAULT_MESSAGE', () => {
+      config.message = '';
+      const validConfig = rpc.validateConfig(config, {});
+
+      expect(validConfig.message).toBe(DEFAULT_MESSAGE);
+    });
   });
 });

@@ -130,6 +130,10 @@ export interface RPC<RemoteType> {
   // results
   destroy: (reason?: string) => Promise<void>;
 
+  // registers a callback and calls it in the event the object's `destroy`
+  // method is called.  `onDestroy` returns a de-registration function
+  onDestroy: (callback: (reason?: string) => any) => () => void;
+
   // this is a promise that resolves if/when the rpc system is ready
   // it will time out and fail at a configurable threshold
   ready: Promise<void>;
